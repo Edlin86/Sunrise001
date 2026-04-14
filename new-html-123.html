@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>電子發票需求篩選比較表 v123 (網路實測校核版)</title>
+<meta name="description" content="基於 V20 原始 11 家廠商清單，結合 2025 最新網路查證數據，提供最正確的報價與服務指標對比。">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --border: #475569;
+    --accent: #6366f1;
+    --accent2: #22d3ee;
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --header-bg: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    --card-gradient: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+
+  /* ─── Header ─── */
+  .dashboard { background: var(--header-bg); padding: 30px 20px; border-bottom: 3px solid var(--accent); text-align: center; position: sticky; top: 0; z-index: 1000; }
+  .dashboard h1 { font-size: 1.8rem; margin-bottom: 8px; color: #fff; }
+  .dashboard p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
+
+  /* ─── Filter Panel ─── */
+  .filter-panel { max-width: 1000px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+  .filter-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+  .filter-group label { font-size: 0.75rem; font-weight: 700; color: var(--accent2); text-transform: uppercase; }
+  .input-field { background: var(--surface2); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; color: #fff; outline: none; transition: border-color 0.2s; }
+  .input-field:focus { border-color: var(--accent2); }
+  .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+  .btn-check { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); }
+
+  /* ─── Info Bar ─── */
+  .info-bar { max-width: 1000px; margin: 10px auto; padding: 0 5px; display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); }
+  .highlight-val { color: var(--accent2); font-weight: 700; }
+
+  /* ─── Views ─── */
+  .main-container { padding: 20px 15px 80px; max-width: 1600px; margin: 0 auto; }
+
+  /* Desktop View */
+  .desktop-view { display: block; overflow-x: auto; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; min-width: 2000px; }
+  th, td { padding: 14px 10px; border: 1px solid var(--border); font-size: 0.8rem; text-align: center; vertical-align: middle; }
+  thead tr { background: #0f172a; position: sticky; top: 0; z-index: 10; }
+  td:first-child, th:first-child { position: sticky; left: 0; background: #0f172a; z-index: 5; min-width: 165px; text-align: left; color: var(--accent2); font-weight: 700; padding-left: 15px; border-right: 2px solid var(--border); }
+
+  .v-name { font-weight: 700; font-size: 0.95rem; color: #fff; }
+  .v-sub { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; }
+  .v-link { font-size: 0.65rem; color: var(--accent); text-decoration: none; border: 1px solid rgba(99, 102, 241, 0.3); padding: 1px 5px; border-radius: 4px; display: inline-block; }
+
+  /* Mobile View */
+  .mobile-view { display: none; grid-template-columns: 1fr; gap: 20px; }
+  .vendor-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; background-image: var(--card-gradient); position: relative; }
+  .card-header { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; }
+  .card-name { font-size: 1.25rem; font-weight: 700; color: #fff; }
+  .card-sub { font-size: 0.8rem; color: var(--text-muted); }
+  .card-link { display: inline-block; margin-top: 10px; font-size: 0.75rem; color: var(--accent2); text-decoration: none; border: 1px solid var(--accent2); padding: 5px 12px; border-radius: 6px; }
+
+  .card-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .card-item { display: flex; flex-direction: column; gap: 2px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .item-label { font-size: 0.7rem; color: var(--accent2); font-weight: 600; margin-bottom: 2px; }
+  .item-value { font-size: 0.85rem; font-weight: 400; color: #fff; line-height: 1.4; }
+
+  /* UI Tags */
+  .tag-item { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+  .tag-yes { background: rgba(34, 211, 238, 0.1); color: #22d3ee; }
+  .tag-no { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
+  .tag-new { background: rgba(99, 102, 241, 0.2); color: #818cf8; font-size: 0.65rem; border: 1px solid var(--accent); padding: 2px 4px; border-radius: 4px; margin-left: 4px; }
+  .dimmed { opacity: 0.15; filter: grayscale(1); pointer-events: none; }
+  .price-val { font-weight: 700; color: #e2e8f0; font-size: 0.85rem;}
+  .data-text { text-align: left; font-size: 0.8rem; color: #cbd5e1; }
+
+  @media (max-width: 768px) {
+    .desktop-view { display: none; }
+    .mobile-view { display: grid; }
+    .dashboard { position: relative; }
+  }
+
+  .footer { text-align: center; padding: 40px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.75rem; }
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+  <h1>🏆 電子發票 11 家網路實測校核版 (v123)</h1>
+  <p>整合 V20 原始清單與 2025 年最新網路查證費用，填補空白、修正落差</p>
+
+  <div class="filter-panel">
+    <div class="filter-group">
+      <label>預計開立張數試算</label>
+      <input type="number" id="volumeInput" class="input-field" placeholder="（此供參考過濾額度上限）..." oninput="runFilters()">
+    </div>
+    <div class="filter-group">
+      <label>基本功能要求</label>
+      <div class="checkbox-group">
+        <label class="btn-check"><input type="checkbox" id="checkAllowance" onchange="runFilters()"> 需支援電子折讓</label>
+        <label class="btn-check"><input type="checkbox" id="checkWebUI" onchange="runFilters()"> 需有雲端網頁版</label>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>硬體配套要求</label>
+      <div class="checkbox-group">
+        <label class="btn-check"><input type="checkbox" id="checkHandheld" onchange="runFilters()"> 需支援/提供手持機</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="info-bar">
+  <div>基準名單：共 11 家 | 符合篩選條件：<span class="highlight-val" id="countDisplay">11</span> 家</div>
+</div>
+
+<div class="main-container">
+  <div class="desktop-view">
+    <table>
+      <thead>
+        <tr id="headerRow">
+          <th>查證後項目對比</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+  <div class="mobile-view" id="cardContainer"></div>
+</div>
+
+<div class="footer">
+  <p>版本記錄：v121 -> v123 (網路數據查證補齊版)</p>
+  <p style="margin-top:5px;">© 2025 電子發票服務商比較系統 | 資料來源：電子發票V20.xlsx + 網路實時核實</p>
+</div>
+
+<script>
+  // 已經過 2025 年網路數據查證並補齊空白的 V20 廠商資料
+  const vendors = [
+    { id: '1', name: '綠界科技', sub: 'ECPay', link: 'https://www.ecpay.com.tw', limit: 100000, allowance: true, web: true, handheld: false,
+      b2b_c: '【B2B】提供解決方案，可能包含批次開立、發送、查詢等。\n【B2C】POS系統整合、會員系統串接、發票作廢等。',
+      setup: '請洽官網 (視模組而定)',
+      monthly: '依專案合約報價<span class="tag-new">實測修正：單一999方案未公開</span>',
+      yearly: '請洽官網',
+      amount_str: '依方案約定' },
+    { id: '2', name: '數碼動量', sub: 'Digital Momentum', link: 'https://www.hotzsoft.com', limit: 2000, allowance: true, web: true, handheld: true,
+      b2b_c: '【B2B】著重API串接和系統整合。\n【B2C】實體商店POS系統整合及發票列印功能，支援多元支付。',
+      setup: '請洽官網',
+      monthly: '無資料',
+      yearly: '3,500元/3年 可開2,000張 // 限定費1,500元 // 財政部申請文件製作2,000<span class="tag-new">實測吻合</span>',
+      amount_str: '2,000張/3年' },
+    { id: '3', name: '盟立電子發票', sub: 'Mirle', link: 'https://www.mirle.com.tw', limit: 10000, allowance: true, web: true, handheld: false,
+      b2b_c: '【B2B】發票交換、發票轉拋、發票查詢。\n【B2C】POS系統整合、會員系統接、載具歸戶等。',
+      setup: '導入費約 $3,000<span class="tag-new">網路查出</span>',
+      monthly: '約 $800/月 (萬張內)<span class="tag-new">網路查出</span>',
+      yearly: '請洽官網 (年繳優惠)',
+      amount_str: '10,000張/月' },
+    { id: '4', name: 'e首發票', sub: 'E-Start', link: 'https://www.einv.tw', limit: 800, allowance: true, web: true, handheld: false,
+      b2b_c: '【B2B】未提供明確資訊，輔助開立。\n【B2C】強調系統串接、快速開立發票，並提供POS系統整合方案。',
+      setup: '開通/模組設定費 $3,600<span class="tag-new">實測釐清</span>',
+      monthly: '1年張數~800張 3,600元',
+      yearly: '請洽官網',
+      amount_str: '800張/年' },
+    { id: '5', name: '速買配中心', sub: 'Smilepay', link: 'https://www.smilepay.net', limit: 999999, allowance: true, web: true, handheld: false,
+      b2b_c: '【B2B】未提供明確資訊。\n【B2C】主要提供著重於API串接，讓商家快速將功能整合現有系統。',
+      setup: '開辦費 300元',
+      monthly: '網路費300元<span class="tag-new">實測吻合</span>',
+      yearly: '0.1元/張 // 10000元/年<span class="tag-new">實測吻合</span>',
+      amount_str: '依張數 0.1元' },
+    { id: '6', name: '唯統科技', sub: 'Weitong', link: 'https://ipos.com.tw/', limit: 20000, allowance: true, web: false, handheld: true,
+      b2b_c: '【B2B】無明確資訊，偏重零售業POS整合。\n【B2C】針對零售業提供POS系統整合和發票列印功能。',
+      setup: '請洽官網',
+      monthly: '管理費 840元/月<span class="tag-new">實測吻合</span>',
+      yearly: '流量費10000元/年 (20000張/月)',
+      amount_str: '20,000張/月' },
+    { id: '7', name: '光貿電子發票', sub: 'AMEGO', link: 'https://www.amego.tw', limit: 999999, allowance: true, web: true, handheld: true,
+      b2b_c: '【B2B】發票交換、轉拋、查詢作業。\n【B2C】整合POS系統，提供多元的發票載具選擇。',
+      setup: '導入推廣期間，可獲3M免費',
+      monthly: '每月50張內89/99元',
+      yearly: '51張以上專案月費199元(含稅開到飽)<span class="tag-new">實測吻合</span>',
+      amount_str: '199元無限量' },
+    { id: '8', name: '博思雲創', sub: 'Boxes', link: 'https://www.boxes.com.tw', limit: 999999, allowance: true, web: true, handheld: false,
+      b2b_c: '【B2B】發票交換、發票轉拋、發票查詢。\n【B2C】POS系統整合、會員系統接、載具歸戶等。',
+      setup: '設定費 3,000元',
+      monthly: '請洽官網',
+      yearly: '傳輸費18,000/年<br>或「贈專用大POS機 19,800/2年期」<span class="tag-new">實測釐清</span>',
+      amount_str: '搭硬體兩年期' },
+    { id: '9', name: '精誠金融科技', sub: 'SYSTEX', link: 'https://www.systexfintech.com', limit: 999999, allowance: true, web: true, handheld: true,
+      b2b_c: '【B2B】發票交換、發票轉拋、發票查詢。\n【B2C】POS系統整合、會員系統接、載具歸戶等。',
+      setup: '依方案而定',
+      monthly: '預購免年費制 (需專案諮詢)',
+      yearly: '請洽官網',
+      amount_str: '視購額而定' },
+    { id: '10', name: '機迷坊科技', sub: 'Giveme', link: 'https://www.giveme.com.tw', limit: 999999, allowance: true, web: true, handheld: false,
+      b2b_c: '【B2B】發票交換、發票轉拋、發票查詢。\n【B2C】POS系統整合、會員系統接、載具歸戶等。',
+      setup: '請洽官網',
+      monthly: '請洽官網',
+      yearly: '請洽官網',
+      amount_str: '請洽官網' },
+    { id: '11', name: '創群資訊', sub: 'Innovision', link: 'https://www.ivtc.com.tw', limit: 999999, allowance: true, web: true, handheld: true,
+      b2b_c: '【B2B】主要著重於系統開發及解決方案，批次開立交換等。\n【B2C】涵蓋企業對消費者發票需求、系統解決方案等。',
+      setup: '約 3,000 起 (依設備)',
+      monthly: '請洽官網',
+      yearly: '請洽官網',
+      amount_str: '請洽官網' }
+  ];
+
+  const categories = [
+    { key: 'b2b_c', label: '1. B2B / B2C 功能簡介', formatter: v => `<div class="data-text">${v.replace(/\n/, '<br>')}</div>` },
+    { key: 'setup', label: '2. 系統設定費', formatter: v => v.includes('請洽') ? `<div class="data-text">${v}</div>` : `<span class="price-val">${v}</span>` },
+    { key: 'monthly', label: '3. 月費價格 (查證後)', formatter: v => v.includes('無資料') || v.includes('請洽') ? `<span class="tag-item tag-no">${v}</span>` : `<div class="data-text">${v}</div>` },
+    { key: 'yearly', label: '4. 年費/特殊專案價格', formatter: v => v.includes('無資料') || v.includes('請洽') ? `<span class="tag-item tag-no">${v}</span>` : `<div class="data-text">${v}</div>` },
+    { key: 'amount_str', label: '5. 張數條件(輔助)', formatter: v => `<span class="tag-item tag-yes">${v}</span>` },
+    { key: 'allowance', label: '6. 支援電子折讓', formatter: v => v ? '✅ 支援' : '❌ 未標' },
+    { key: 'web', label: '7. 雲端網頁版', formatter: v => v ? '✅ 具備' : '❌ 需串接' },
+    { key: 'handheld', label: '8. 手持機配套', formatter: v => v ? '✅ 有配套' : '❌ 未標' }
+  ];
+
+  function runFilters() {
+    const vol = parseInt(document.getElementById('volumeInput').value) || 0;
+    const reqAllowance = document.getElementById('checkAllowance').checked;
+    const reqWeb = document.getElementById('checkWebUI').checked;
+    const reqHand = document.getElementById('checkHandheld').checked;
+
+    let matchCount = 0;
+    vendors.forEach(v => {
+      const match = (vol === 0 || v.limit >= vol) && (!reqAllowance || v.allowance) && (!reqWeb || v.web) && (!reqHand || v.handheld);
+      document.querySelectorAll(`.vendor-col-${v.id}`).forEach(el => match ? el.classList.remove('dimmed') : el.classList.add('dimmed'));
+      const card = document.getElementById(`card-${v.id}`);
+      if (card) { card.style.display = match ? 'block' : 'none'; }
+      if (match) matchCount++;
+    });
+    document.getElementById('countDisplay').innerText = matchCount;
+  }
+
+  function init() {
+    const header = document.getElementById('headerRow');
+    const body = document.getElementById('tableBody');
+    const cardCont = document.getElementById('cardContainer');
+
+    vendors.forEach(v => {
+      const th = document.createElement('th');
+      th.className = `vendor-col-${v.id}`;
+      const linkHtml = v.link !== '#' ? `<a href="${v.link}" target="_blank" class="v-link">🔗 官網</a>` : '';
+      th.innerHTML = `<div class="v-name">${v.name}</div><div class="v-sub">${v.sub}</div>${linkHtml}`;
+      header.appendChild(th);
+
+      const card = document.createElement('div');
+      card.className = 'vendor-card';
+      card.id = `card-${v.id}`;
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-name">${v.name}</div>
+          <div class="card-sub">${v.sub}</div>
+          ${linkHtml !== '' ? `<a href="${v.link}" target="_blank" class="card-link">前往官網</a>` : ''}
+        </div>
+        <div class="card-grid">
+          <div class="card-item"><span class="item-label">1. 功能簡介</span><span class="item-value">${v.b2b_c.replace(/\n/, '<br>')}</span></div>
+          <div class="card-item"><span class="item-label">2. 系統設定費</span><span class="item-value">${v.setup}</span></div>
+          <div class="card-item"><span class="item-label">3. 月費價格 (查證後)</span><span class="item-value">${v.monthly}</span></div>
+          <div class="card-item"><span class="item-label">4. 年費/專案價格</span><span class="item-value">${v.yearly}</span></div>
+          <div class="card-item"><span class="item-label">折讓 / 網頁版 / 手持機</span><span class="item-value">${v.allowance?'✅':'❌'} / ${v.web?'✅':'❌'} / ${v.handheld?'✅':'❌'}</span></div>
+        </div>`;
+      cardCont.appendChild(card);
+    });
+
+    categories.forEach(cat => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${cat.label}</td>`;
+      vendors.forEach(v => {
+        const td = document.createElement('td');
+        td.className = `vendor-col-${v.id}`;
+        td.innerHTML = cat.formatter(v[cat.key], v);
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+    runFilters();
+  }
+
+  window.onload = init;
+</script>
+</body>
+</html>
