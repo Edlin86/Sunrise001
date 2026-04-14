@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>電子發票需求篩選比較表 v115 (完整 8 項目版)</title>
+<meta name="description" content="2025 電子發票服務商完整 8 項目比較，包含字軌代辦、折讓、網頁版、手持機、費用與張數全面對照。">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --border: #475569;
+    --accent: #6366f1;
+    --accent2: #22d3ee;
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --header-bg: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .dashboard {
+    background: var(--header-bg);
+    padding: 30px 20px;
+    border-bottom: 2px solid var(--accent);
+    text-align: center;
+  }
+  .dashboard h1 { font-size: 2rem; margin-bottom: 10px; color: #fff; }
+  .dashboard p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
+
+  .filter-panel {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .filter-group { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+  .filter-group label { font-size: 0.8rem; font-weight: 700; color: var(--accent2); }
+  .input-field { background: var(--surface2); border: 1px solid var(--border); padding: 10px; border-radius: 6px; color: #fff; outline: none; }
+  .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+  .btn-check { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); }
+
+  .main-container { padding: 30px 15px 80px; }
+  .table-wrap {
+    max-width: 1600px;
+    margin: 0 auto;
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  table { width: 100%; border-collapse: collapse; min-width: 1600px; }
+  th, td { padding: 15px 10px; border: 1px solid var(--border); font-size: 0.82rem; text-align: center; }
+
+  thead tr { background: #0f172a; position: sticky; top: 0; z-index: 10; }
+  td:first-child, th:first-child {
+    position: sticky; left: 0; background: #0f172a; z-index: 5;
+    min-width: 170px; text-align: left; color: var(--accent2); font-weight: 700; padding-left: 20px;
+  }
+
+  .v-name { font-weight: 700; font-size: 0.95rem; color: #fff; }
+  .v-sub { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; }
+  .v-link { font-size: 0.65rem; color: var(--accent); text-decoration: none; border: 1px solid rgba(99, 102, 241, 0.3); padding: 1px 5px; border-radius: 4px; }
+
+  tbody tr:nth-child(even) { background: rgba(255,255,255,0.01); }
+  .dimmed { opacity: 0.25; filter: grayscale(1); }
+
+  .tag-item { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+  .tag-yes { background: rgba(34, 211, 238, 0.1); color: #22d3ee; }
+  .tag-no { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
+  .tag-feat { background: var(--accent); color: #fff; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; margin-bottom: 5px; }
+
+  .price-val { font-weight: 700; color: #fff; }
+  .footer { text-align: center; padding: 40px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.75rem; }
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+  <h1>📊 電子發票完整 8 項目比較表 (v115)</h1>
+  <p>深度考量：新定位、設定費、營運費、張數上限、代辦服務、折讓、網頁版、手持機</p>
+
+  <div class="filter-panel">
+    <div class="filter-group">
+      <label>每月開立張數</label>
+      <input type="number" id="volumeInput" class="input-field" placeholder="鎖定預算規模..." oninput="runFilters()">
+    </div>
+    <div class="filter-group">
+      <label>核心功能</label>
+      <div class="checkbox-group">
+        <label class="btn-check"><input type="checkbox" id="checkAllowance" onchange="runFilters()"> 支援電子折讓</label>
+        <label class="btn-check"><input type="checkbox" id="checkWebUI" onchange="runFilters()"> 雲端網頁界面</label>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>特殊需求</label>
+      <div class="checkbox-group">
+        <label class="btn-check"><input type="checkbox" id="checkHandheld" onchange="runFilters()"> 提供手持發票機</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main-container">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr id="headerRow">
+          <th>專業對比項目</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="footer">
+  <p>版本記錄：v113 -> v115 (擴充 8 項目版) | 資料更新：2025/04/14</p>
+</div>
+
+<script>
+  const vendors = [
+    { id: 'ecpay', name: '綠界科技', sub: 'ECPay', link: 'https://www.ecpay.com.tw', setup: 3600, fee: '年繳制', limit: 100000, agent: '代辦 3,000 元', allowance: true, web: true, handheld: false, feat: '電商金流強' },
+    { id: 'ezreceipt', name: '易發票', sub: 'EzReceipt', link: 'https://www.ezreceipt.cc', setup: 1800, fee: '$99/月(年繳)', limit: 20000, agent: '含在開通費', allowance: true, web: true, handheld: true, feat: 'Shopify串接強' },
+    { id: 'guangmao', name: '光貿發票', sub: 'AMEGO', link: 'https://www.amego.tw', setup: 3600, fee: '$199/月', limit: 999999, agent: '代辦 3,600 元', allowance: true, web: true, handheld: true, feat: '199元開到飽' },
+    { id: 'cetustek', name: '鯨躍科技', sub: 'Cetustek', link: 'https://www.cetustek.com.tw', setup: 0, fee: '依方案報價', limit: 50000, agent: '專案內含', allowance: true, web: true, handheld: true, feat: '資深零售Turnkey' },
+    { id: 'systex', name: '精誠金融', sub: 'SYSTEX', link: 'https://www.systexfintech.com', setup: 3500, fee: '免年費(預購)', limit: 200000, agent: '內含代辦', allowance: true, web: true, handheld: true, feat: '免年費/大廠服務' },
+    { id: 'giveme', name: '機迷坊', sub: 'Giveme', link: 'https://www.giveme.com.tw', setup: 9000, fee: '3年均價方案', limit: 12000, agent: '免代辦費', allowance: true, web: true, handheld: false, feat: '穩定長約型' },
+    { id: 'windada', name: '碼農電商', sub: 'WinDada', link: 'https://www.hotzsoft.com', setup: 3600, fee: '月/年費依量', limit: 10000, agent: '代辦約 3,000', allowance: true, web: true, handheld: false, feat: 'ERP開發背景' },
+    { id: 'haokai', name: '好開發票', sub: 'HaoKai', link: 'https://www.haokai.com.tw', setup: 0, fee: '50張內免費', limit: 50, agent: '代辦額外收費', allowance: true, web: true, handheld: false, feat: '極小量首選' },
+    { id: 'estart', name: 'e首發票', sub: 'E-Start', link: 'https://www.einv.tw', setup: 3600, fee: '分級方案制', limit: 500, agent: '代辦約 2,000', allowance: true, web: true, handheld: false, feat: 'LINE載具整合高' },
+    { id: 'rentong', name: '仁統科技', sub: 'RenTong', link: 'http://www.rentong.com.tw', setup: 5000, fee: '租售硬體包含', limit: 30000, agent: '服務內含', allowance: true, web: false, handheld: true, feat: '實體收銀POS方案' },
+    { id: 'tradevan', name: '通貿發票', sub: 'TradeVan', link: 'https://www.tradevan.com.tw', setup: 3000, fee: '傳輸費累進制', limit: 100000, agent: '關貿體系代辦', allowance: true, web: true, handheld: false, feat: '資安/傳輸穩定' },
+    { id: 'ezcs', name: '眾群資訊', sub: 'EZCS', link: 'https://www.ezcs.com.tw', setup: 3000, fee: '專案客製模式', limit: 15000, agent: '代辦費另計', allowance: true, web: true, handheld: false, feat: '系統委外開發' }
+  ];
+
+  const categories = [
+    { key: 'feat', label: '1.核心競爭力', formatter: v => `<span class="tag-feat">${v}</span>` },
+    { key: 'setup', label: '2.系統設定費', formatter: v => v === 0 ? '<span class="tag-yes">0元/免開通</span>' : `<span class="price-val">$${v.toLocaleString()}</span>` },
+    { key: 'fee', label: '3.方案營運費', formatter: v => `<span class="price-val">${v}</span>` },
+    { key: 'limit', label: '4.發票張數額度', formatter: v => v > 500000 ? '<span class="tag-yes">無限/吃到飽</span>' : `${v.toLocaleString()} 張/月` },
+    { key: 'agent', label: '5.代辦字軌申請', formatter: v => `<span class="price-val">${v}</span>` },
+    { key: 'allowance', label: '6.支援電子折讓', formatter: v => v ? '<span class="tag-item tag-yes">支援</span>' : '<span class="tag-item tag-no">未標註</span>' },
+    { key: 'web', label: '7.雲端網頁界面', formatter: v => v ? '<span class="tag-item tag-yes">有</span>' : '<span class="tag-item tag-no">需安裝/POS</span>' },
+    { key: 'handheld', label: '8.手持發票機', formatter: v => v ? '<span class="tag-item tag-yes">有配套</span>' : '<span class="tag-item tag-no">無配套</span>' }
+  ];
+
+  function runFilters() {
+    const vol = parseInt(document.getElementById('volumeInput').value) || 0;
+    const reqAllowance = document.getElementById('checkAllowance').checked;
+    const reqWeb = document.getElementById('checkWebUI').checked;
+    const reqHand = document.getElementById('checkHandheld').checked;
+
+    vendors.forEach(v => {
+      const match = (vol === 0 || v.limit >= vol) && (!reqAllowance || v.allowance) && (!reqWeb || v.web) && (!reqHand || v.handheld);
+      document.querySelectorAll(`.vendor-col-${v.id}`).forEach(el => match ? el.classList.remove('dimmed') : el.classList.add('dimmed'));
+    });
+  }
+
+  function init() {
+    const header = document.getElementById('headerRow');
+    const body = document.getElementById('tableBody');
+
+    vendors.forEach(v => {
+      const th = document.createElement('th');
+      th.className = `vendor-col-${v.id}`;
+      th.innerHTML = `
+        <div class="v-name">${v.name}</div>
+        <div class="v-sub">${v.sub}</div>
+        <a href="${v.link}" target="_blank" class="v-link">🔗 官網驗證</a>
+      `;
+      header.appendChild(th);
+    });
+
+    categories.forEach(cat => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${cat.label}</td>`;
+      vendors.forEach(v => {
+        const td = document.createElement('td');
+        td.className = `vendor-col-${v.id}`;
+        td.innerHTML = cat.formatter(v[cat.key]);
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+    runFilters();
+  }
+
+  window.onload = init;
+</script>
+</body>
+</html>
